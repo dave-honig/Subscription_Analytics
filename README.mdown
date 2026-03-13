@@ -12,12 +12,14 @@ As a non-profit we always need to be aware of money coming in and keeping our cu
 
 All code was built in PostgreSQL.
 
+
 ## Business Questions Answered
 - Which subscription plans generate the most recurring revenue?
 - What is the churn rate by plan?
 - Which customers have failed payments and open support issues?
 - How does monthly revenue trend over time?
 - What is the lifetime value of each customer?
+
 
 ## Skills Demonstrated
 - Table design and relationships (PRIMARY KEY, FOREIGN KEY)
@@ -28,11 +30,13 @@ All code was built in PostgreSQL.
 - Window functions (running totals with SUM OVER)
 - Date functions (DATE_TRUNC)
 
+
 ## Schema
 - `customers`- company name, industry, country, signup date
 - `subscriptions` - plan, price, start and end dates
 - `payments` - payment date, amount, success or failure
 - `support_tickets` - category, open or resolved
+
 
 ## Files
 | File | Description |
@@ -42,6 +46,7 @@ All code was built in PostgreSQL.
 | `queries.sql` | Queries |
 | `README.md` | Project Description |
 
+---
 
 ### How many active subscribers do we have per plan, and what is the monthly recurring revenue each plan generates?
 
@@ -56,6 +61,7 @@ GROUP BY plan_name
 ORDER BY monthly_recurring_revenue DESC;
 ```
 
+---
 
 ### How many customers have ended their subscriptions, and how long did they stay before canceling?
 
@@ -73,10 +79,10 @@ WHERE s.end_date IS NOT NULL
 ORDER BY days_as_customer ASC;
 ```
 
+---
 
 ### What is the churn rate for each subscription plan?
 Churn rate = (lost customers / total customers) * 100
-
 
 ```PostgreSQL
 WITH plan_totals AS (
@@ -96,6 +102,7 @@ FROM plan_totals
 ORDER BY churn_rate_pct DESC;
 ```
 
+---
 
 ### What is total revenue collected per month, and how does it trend over time?
 I do find this formula interesting as it uses a window function on a aggrgated field.
@@ -112,8 +119,8 @@ GROUP BY DATE_TRUNC('month', payment_date)
 ORDER BY month;
 ```
 
-Another approach would be to use a CTE to obtain the month, total_payments, and total_revenue.
-Then use a SUM window function on total_revenue over the month as seen below.
+Another approach is to use a CTE to obtain the *month, total_payments, and total_revenue*.
+Then use a SUM window function on *total_revenue over the month* as seen below.
 
 ```PostgreSQL
 WITH monthly_totals AS (
@@ -134,6 +141,7 @@ FROM monthly_totals
 ORDER BY month;
 ```
 
+---
 
 ### Which customers have failed payments, and do they also have unresolved support tickets?
 
@@ -154,6 +162,7 @@ GROUP BY c.company_name, c.industry
 ORDER BY failed_payments DESC;
 ```
 
+---
 
 ### What is the total revenue collected from each customer for the duration of their subscription?
 
@@ -174,6 +183,8 @@ GROUP BY
     s.plan_name, s.start_date, s.end_date
 ORDER BY lifetime_revenue DESC;
 ```
+
+---
 
 **Thank you for you time reviewing this project.**
 
