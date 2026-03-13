@@ -1,0 +1,361 @@
+# Subscription Analytics
+
+## Overview
+In this scenario I will take the role as a data analysis for a company similar to DGI. We are a non-profit subscription based website who provide access to metadata about healthcare databases from around the world.
+
+There are 3 monthly plans offered:
+	+ Basic for $99,
+	+ Pro for $299, and
+	+ Enterprise for $799
+
+As a non-profit we always need to be aware of money coming in and keeping our customers happy. This SQL portfolio project analyzes customer subscriptions, revenue trends, customer retention, and payment behavior for the business. 
+
+All code was built in PostgreSQL.
+
+## Business Questions Answered
+- Which subscription plans generate the most recurring revenue?
+- What is the churn rate by plan?
+- Which customers have failed payments and open support issues?
+- How does monthly revenue trend over time?
+- What is the lifetime value of each customer?
+
+## Skills Demonstrated
+- Table design and relationships (PRIMARY KEY, FOREIGN KEY)
+- JOINs (INNER, LEFT)
+- Aggregations (COUNT, SUM, GROUP BY)
+- Filtering (WHERE, FILTER)
+- Common Table Expressions (CTEs)
+- Window functions (running totals with SUM OVER)
+- Date functions (DATE_TRUNC)
+
+## Schema
+- `customers`- company name, industry, country, signup date
+- `subscriptions` - plan, price, start and end dates
+- `payments` - payment date, amount, success or failure
+- `support_tickets` - category, open or resolved
+
+## Files
+| File | Description |
+|------|-------------|
+| `schema.sql` | Table creation |
+| `insert_data.sql` | Sample data |
+| `queries.sql` | Queries |
+| `README.md` | Project Description |
+
+
+###How many active subscribers do we have per plan, and what is the monthly recurring revenue each plan generates?
+
+```PostgreSQL
+SELECT
+    plan_name,
+    COUNT(*) AS active_subscribers,
+    SUM(monthly_price) AS monthly_recurring_revenue
+FROM subscriptions
+WHERE end_date IS NULL
+GROUP BY plan_name
+ORDER BY monthly_recurring_revenue DESC;
+```
+
+
+###How many customers have ended their subscriptions, and how long did they stay before canceling?
+
+```PostgreSQL
+SELECT
+    c.company_name,
+    c.industry,
+    s.plan_name,
+    s.start_date,
+    s.end_date,
+    (s.end_date - s.start_date) AS days_as_customer
+FROM customers c
+JOIN subscriptions s ON c.customer_id = s.customer_id
+WHERE s.end_date IS NOT NULL
+ORDER BY days_as_customer ASC;
+```
+
+
+###What is the churn rate for each subscription plan?
+Churn rate = (lost customers / total customers) * 100
+
+
+```PostgreSQL
+WITH plan_totals AS (
+    SELECT
+        plan_name,
+        COUNT(*) AS total_subscribers,
+        COUNT(*) FILTER (WHERE end_date IS NOT NULL) AS lost_customers
+    FROM subscriptions
+    GROUP BY plan_name
+)
+SELECT
+    plan_name,
+    total_subscribers,
+    lost_customers,
+    ROUND(lost_customers::numeric / total_subscribers * 100.0, 2) AS churn_rate_pct
+FROM plan_totals
+ORDER BY churn_rate_pct DESC;
+```
+
+
+###What is total revenue collected per month, and how does it trend over time?
+I do find this formula interesting as it uses a window function on a aggrgated field.
+
+```PostgreSQL
+SELECT
+    DATE_TRUNC('month', payment_date) AS month,
+    COUNT(*) AS total_payments,
+    SUM(amount) AS total_revenue,
+    SUM(SUM(amount)) OVER (ORDER BY DATE_TRUNC('month', payment_date))  AS running_total_revenue
+FROM payments
+WHERE status = 'paid'
+GROUP BY DATE_TRUNC('month', payment_date)
+ORDER BY month;
+```
+
+Another approach would be to use a CTE to obtain the month, total_payments, and total_revenue.
+Then use a SUM window function on total_revenue over the month as seen below.
+
+```PostgreSQL
+WITH monthly_totals AS (
+    SELECT
+        DATE_TRUNC('month', payment_date) AS month,
+        SUM(amount) AS total_revenue,
+        COUNT(*) AS total_payments
+    FROM payments
+    WHERE status = 'paid'
+    GROUP BY DATE_TRUNC('month', payment_date)
+)
+SELECT
+    month,
+    total_payments,
+    total_revenue,
+    SUM(total_revenue) OVER (ORDER BY month) AS running_total_revenue
+FROM monthly_totals
+ORDER BY month;
+```
+
+
+###Which customers have failed payments, and do they also have unresolved support tickets?
+
+```PostgreSQL
+SELECT
+    c.company_name,
+    c.industry,
+    COUNT(p.payment_id) AS failed_payments,
+    COUNT(t.ticket_id) AS open_tickets
+FROM customers c
+JOIN subscriptions s ON c.customer_id = s.customer_id
+JOIN payments p ON s.subscription_id = p.subscription_id
+LEFT JOIN support_tickets t
+    ON c.customer_id = t.customer_id
+    AND t.resolved = false
+WHERE p.status = 'failed'
+GROUP BY c.company_name, c.industry
+ORDER BY failed_payments DESC;
+```
+
+
+###What is the total revenue collected from each customer for the duration of their subscription?
+
+```PostgreSQL
+SELECT
+    c.company_name,
+    c.industry,
+    s.plan_name,
+    s.start_date,
+    s.end_date,
+    SUM(p.amount) AS lifetime_revenue
+FROM customers c
+JOIN subscriptions s ON c.customer_id = s.customer_id
+JOIN payments p ON s.subscription_id = p.subscription_id
+WHERE p.status = 'paid'
+GROUP BY
+    c.company_name, c.industry,
+    s.plan_name, s.start_date, s.end_date
+ORDER BY lifetime_revenue DESC;
+```
+
+
+
+
+
+
+
+# Markdown Document
+
+## Introduction
+
+Markdown is a plain text formatting syntax.
+
+Paragraphs are separated by empty lines.
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+## Character Styles
+
+These spans result in 'em' tags:
+
+- *single asterisks*
+- _single underscores_
+
+These spans result in 'strong' tags:
+
+- **double asterisks**
+- __double underscores__
+
+These spans result in 'del' tags:
+
+- ~~double tildes~~
+
+## Links and Images
+
+This is an [example inline link](https://www.actiprosoftware.com "Actipro Software") with tooltip text specified.
+[This link](https://www.actiprosoftware.com) has no tooltip text specified.
+
+URLs and e-mail addresses can be turned into links by enclosing them in angle braces:
+
+- <https://www.actiprosoftware.com>  
+- <support@microsoft.com>
+
+[This link](#markdown-document) links to the first heading in this document via custom ID.
+
+## Images
+
+This is an example of an image:
+
+![Image](https://www.microsoft.com/favicon.ico)
+
+This is an example of an image with a link:
+
+[![Image](https://www.google.com/favicon.ico)](https://www.google.com)
+
+## Blockquotes
+
+Markdown said:
+
+> This is the first level of quoting.
+>
+> > This is a nested blockquote.
+>
+> Back to the first level.
+
+## Lists
+
+Unordered list using minus signs (-):
+
+- Step 1
+- Step 2
+- Step 3
+  - Step 3a
+  - Step 3b
+  - Step 3c
+
+Unordered list using plus signs (+):
+
++ Step 1
++ Step 2
++ Step 3
+  + Step 3a
+  + Step 3b
+  + Step 3c
+
+Unordered list using asterisks (*):
+
+* Step 1
+* Step 2
+* Step 3
+  * Step 3a
+  * Step 3b
+  * Step 3c
+
+Ordered list:
+
+1. Step 1
+1. Step 2
+1. Step 3
+    1. Step 3a
+    1. Step 3b
+    1. Step 3c
+
+Nested (unordered within ordered) list:
+
+1. Step 1
+1. Step 2
+1. Step 3
+    - Step 3a
+    - Step 3b
+    - Step 3c
+
+Definition list:
+
+Term #1
+: This is the definition of term #1.
+
+Term #2
+: This is the definition of term #2.
+
+## Code Blocks
+
+Inline `code` can be delimited with characters.
+
+This code block is fenced with three backticks and has its language specified:
+
+```javascript
+var oldUnload = window.onbeforeunload;
+window.onbeforeunload = function() {
+    saveCoverage();
+    if (oldUnload) {
+        return oldUnload.apply(this, arguments);
+    }
+};
+```
+
+This code block is fenced with three tildes and has its language specified:
+
+~~~ruby
+require 'redcarpet'
+markdown = Redcarpet.new("Hello World!")
+puts markdown.to_html
+~~~
+
+This code block is created by indenting the code, but no language can be specified:
+
+    var foo = 1;
+
+## Tables
+
+| Fruit  | Color  |
+|--------|--------|
+| Apples | Red    |
+| Grapes | Purple |
+| Lemons | Yellow |
+
+## Horizontal Rules
+
+Horizontal rules are formed by placing three or more hyphens, asterisks, or underscores on a line by themselves.
+
+---
+
+***
+
+___
+
+## HTML Tags
+
+<strong>HTML tags</strong> can optionally be used in <em>Markdown</em>.
+
+## Special Characters
+
+Unescaped:
+\ ` * _ { } [ ] ( ) # + - . !
+
+Backslash-Escaped:
+\\ \` \* \_ \{ \} \[ \] \( \) \# \+ \- \. \!
