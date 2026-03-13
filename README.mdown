@@ -50,6 +50,7 @@ All code was built in PostgreSQL.
 
 ---
 
+
 ## Key Findings
 
 ### **Enterprise plan drives the most revenue** despite having the fewest subscribers, generating $1,598/month from just 2 customers.
@@ -76,6 +77,9 @@ All code was built in PostgreSQL.
   - Pro plan customers with multiple payments may also be good candidates to try and upsell to a Enterprise tier. Maybe offer a discount for their first month so they can try out the added capabilities. 
 
 ---
+
+
+## Queries
 
 ### How many active subscribers do we have per plan, and what is the monthly recurring revenue each plan generates?
 
