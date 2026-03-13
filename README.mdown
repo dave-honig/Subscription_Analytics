@@ -52,26 +52,26 @@ All code was built in PostgreSQL.
 
 ## Key Findings
 
-**Enterprise plan drives the most revenue** despite having the fewest subscribers, generating $1,598/month from just 2 customers.
+### **Enterprise plan drives the most revenue** despite having the fewest subscribers, generating $1,598/month from just 2 customers.
   - We should follow up with these clients individually to make sure they are not having any difficulty using our service.
   - Offer a free training session as they may have new employees unfamiliar with our service.
   - Get some insights on how our service is being used so we have an idea where we should improve.
 
-**Basic plan has the highest churn rate at 67%.**
+### **Basic plan has the highest churn rate at 67%.**
   - This is our lowest priced option.
   - We may need to evaluate what is offered at each plan tier and possibly offer an option currently in the Pro level to the Basic tier.
   - We should also double check what our competitors are offering for the same price.
   - Are we following up with these clients (ideally via a phone call) to find out why they ended their subscription?
 
-**Two customers show both failed payments and unresolved support tickets.**
+### **Two customers show both failed payments and unresolved support tickets.**
   - We should flag them as a high risk of cancellation.
   - Before reaching out we should review the details of their open ticket to see if we can be proactive in solving it.
   - The same applies to the failed payment. Did they try to submit a payment but something happened in billing?
 
-**Monthly revenue trended upward** through mid-2022 as new subscribers joined, with the running total reaching $4,588 by August 2022.
+### **Monthly revenue trended upward** through mid-2022 as new subscribers joined, with the running total reaching $4,588 by August 2022.
   - We should look into what happened after April 2022. Did something change in our service? Did our competition change?
 
-**Acme Corp (Pro Subscription) is the highest lifetime value customer** at $897 across three Pro payments.
+### **Acme Corp (Pro Subscription) is the highest lifetime value customer** at $897 across three Pro payments.
   - Acme Corp should be treated as a priority retention account given their consistent payment history.
   - Pro plan customers with multiple payments may also be good candidates to try and upsell to a Enterprise tier. Maybe offer a discount for their first month so they can try out the added capabilities. 
 
