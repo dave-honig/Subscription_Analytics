@@ -37,6 +37,8 @@ All code was built in PostgreSQL.
 - `payments` - payment date, amount, success or failure
 - `support_tickets` - category, open or resolved
 
+**A simple Entity-Relationship Diagram (ERD) helps us visualize the relationships.**
+	<img src="/Entity_Relationship_Diagram.png" width=100% alt="Entity-Relationship Diagram (ERD)">  
 
 ## Files
 | File | Description |
@@ -45,6 +47,21 @@ All code was built in PostgreSQL.
 | `insert_data.sql` | Sample data |
 | `queries.sql` | Queries |
 | `README.md` | Project Description |
+
+---
+
+## Key Findings
+
+- **Enterprise plan drives the most revenue** despite having the fewest 
+  subscribers, generating $1,598/month from just 2 customers. 
+- **Basic plan has the highest churn rate** at 67%, suggesting price-sensitive 
+  customers are least likely to stick around.
+- **Two customers show both failed payments and unresolved support tickets**, 
+  flagging them as high churn risk requiring immediate outreach.
+- **Monthly revenue trended upward** through mid-2022 as new subscribers joined, 
+  with the running total reaching $4,588 by August 2022.
+- **Harmon & Voss (Enterprise)** is the highest lifetime value customer at $799 
+  collected, followed by Acme Corp at $897 across three Pro payments.
 
 ---
 
@@ -105,7 +122,7 @@ ORDER BY churn_rate_pct DESC;
 ---
 
 ### What is total revenue collected per month, and how does it trend over time?
-I do find this formula interesting as it uses a window function on a aggrgated field.
+I do find this formula interesting as it uses a window function on a aggregated field.
 
 ```PostgreSQL
 SELECT
